@@ -1,3 +1,4 @@
+import 'package:aumpwa/widget/register.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -8,23 +9,69 @@ class Authen extends StatefulWidget {
 }
 
 class _AuthenState extends State<Authen> {
-
   bool statusRedEye = true;
 
   //create state
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              buildContainer(),
-              buildText(),
-              userText(),
-              passwordText(),
-            ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -0.4),
+            radius: 3,
+            colors: [Colors.white, Colors.blue],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                buildContainer(),
+                buildText(),
+                userText(),
+                passwordText(),
+                loginbutton(),
+                registerbutton()
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  FlatButton registerbutton() => FlatButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Register()),
+          );
+        },
+        child: Text(
+          'Create New User',
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.black54,
+          ),
+        ),
+      );
+
+  Container loginbutton() {
+    return Container(
+      width: 250,
+      height: 45,
+      margin: EdgeInsets.only(top: 16),
+      child: RaisedButton(
+        color: Colors.lightBlue[700],
+        onPressed: () {},
+        child: Text(
+          'Login',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -53,14 +100,16 @@ class _AuthenState extends State<Authen> {
       child: TextField(
         obscureText: statusRedEye,
         decoration: InputDecoration(
-            labelText: 'Password :',
-            border: OutlineInputBorder(),
-            suffixIcon:
-                IconButton(icon: Icon(Icons.remove_red_eye), onPressed: (){
-                  setState(() {
-                    statusRedEye = !statusRedEye;
-                  });
-                }),),
+          labelText: 'Password :',
+          border: OutlineInputBorder(),
+          suffixIcon: IconButton(
+              icon: Icon(Icons.remove_red_eye),
+              onPressed: () {
+                setState(() {
+                  statusRedEye = !statusRedEye;
+                });
+              }),
+        ),
       ),
     );
   }
@@ -69,8 +118,8 @@ class _AuthenState extends State<Authen> {
         'UNPLAN',
         style: GoogleFonts.montserrat(
             textStyle: TextStyle(
-                fontSize: 30,
-                color: Colors.blue[300],
+                fontSize: 40,
+                color: Colors.lightBlue[700],
                 fontWeight: FontWeight.bold)),
       );
 
