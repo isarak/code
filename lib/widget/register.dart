@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
 
 class Register extends StatefulWidget {
@@ -7,7 +11,8 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  List<String> positions = [ // List<type> is array
+  List<String> positions = [
+    // List<type> is array
     'Computer technicial',
     'Manager',
     'Administrator',
@@ -18,6 +23,7 @@ class _RegisterState extends State<Register> {
 
   String choosePositon; //defualt is null
   double lat, long; //defualt is null
+  File file; // select import dart.io
 
   @override
   void initState() {
@@ -27,17 +33,20 @@ class _RegisterState extends State<Register> {
     findLatlng();
   }
 
-  Future<Null> findLatlng()async{
-    LocationData locationData = await findLocation(); 
-    lat = locationData.latitude;
-    long = locationData.longitude;
-    print('lat = $lat,lng=$long');
+  Future<Null> findLatlng() async {
+    LocationData locationData = await findLocation();
+    setState(() {
+      lat = locationData.latitude;
+      long = locationData.longitude;
+      print('lat = $lat,lng=$long');
+    });
   }
 
-  Future<LocationData> findLocation()async{
+  Future<LocationData> findLocation() async {
     Location location = Location(); //Location is class of package location
     try {
-      return await location.getLocation(); //await is watting for complete command. 
+      return await location
+          .getLocation(); //await is watting for complete command.
     } catch (e) {
       print('Can not load location. error code ==>${e.toString()}');
       return null;
@@ -48,7 +57,8 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(), // appBar is show bar on apps.
-      body: SingleChildScrollView( //SingleChildScrollView is Scroll View
+      body: SingleChildScrollView(
+        //SingleChildScrollView is Scroll View
         child: Column(
           children: [
             buildAvatar(),
@@ -59,30 +69,63 @@ class _RegisterState extends State<Register> {
             buildPosition(),
             buildUser(),
             buildPassword(),
-            buildMap(),
+            lat == null ? CircularProgressIndicator() : buildMap(), //shot if
           ],
         ),
       ),
     );
   }
 
-  Container buildMap() => Container(
-        margin: EdgeInsets.only(top: 10, bottom: 10),
-        width:
-            MediaQuery.of(context).size.width * 0.8, //set width 80% of display
-        height: MediaQuery.of(context).size.width * 0.8, // set width for square
-        color: Colors.grey,
-      );
+  Set<Marker> mySet() {
+    return <Marker>[
+      Marker(
+        markerId: MarkerId('myID'),
+        position: LatLng(lat, long),
+        infoWindow: InfoWindow(
+          title: 'You are here.',
+          snippet: 'lat = $lat, lng = $long',
+        ),
+      )
+    ].toSet();
+  }
+
+  Container buildMap() {
+    CameraPosition cameraPosition = CameraPosition(
+      target: LatLng(lat, long),
+      zoom: 16,
+    );
+
+    return Container(
+      margin: EdgeInsets.only(top: 10, bottom: 10),
+      width: MediaQuery.of(context).size.width * 0.8, //set width 80% of display
+      height: MediaQuery.of(context).size.width * 0.8, // set width for square
+      child: GoogleMap(
+        initialCameraPosition: cameraPosition,
+        mapType: MapType.normal,
+        onMapCreated: (controller) {},
+        markers: mySet(),
+      ),
+      //color: Colors.grey,
+    );
+  }
 
   Container buildPosition() => Container(
         margin: EdgeInsets.only(top: 10, bottom: 10),
         width: 250,
-        child: DropdownButton<String>( 
+        child: DropdownButton<String>(
           items: positions
               .map(
                 //map like JSON syntag
                 (e) => DropdownMenuItem(
-                  child: Text(e),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.assignment_ind,
+                        color: Colors.lightBlue,
+                      ),
+                      Text(e),
+                    ],
+                  ),
                   value: e,
                 ),
               )
@@ -188,19 +231,39 @@ class _RegisterState extends State<Register> {
     );
   }
 
+  Future<Null> chooseAvatar(ImageSource source) async {
+    try {
+      var result = await ImagePicker().getImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+      );
+      setState(() {
+        file = File(result.path);
+      });
+    } catch (e) {}
+  }
+
   Container buildAvatar() {
     return Container(
       margin: EdgeInsets.only(top: 30, bottom: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          IconButton(icon: Icon(Icons.add_a_photo), onPressed: null),
+          IconButton(
+            icon: Icon(Icons.add_a_photo),
+            onPressed: () => chooseAvatar(ImageSource.camera),
+          ),
           Container(
             width: 180,
             height: 180,
-            child: Image.asset('images/user.png'),
+            child: file == null
+                ? Image.asset('images/user.png')
+                : Image.file(file),
           ),
-          IconButton(icon: Icon(Icons.add_photo_alternate), onPressed: null),
+          IconButton(
+              icon: Icon(Icons.add_photo_alternate),
+              onPressed: () => chooseAvatar(ImageSource.gallery)),
         ],
       ),
     );
