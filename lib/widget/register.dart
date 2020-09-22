@@ -9,13 +9,49 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text(
-          'Create New User',
+      appBar: buildAppBar(),
+      body: Column(
+        children: [
+          buildAvatar(),
+          buildName(),
+        ],
+      ),
+    );
+  }
+
+  Container buildName() {
+    return Container(
+      width: 250,
+      height: 50,
+      child: TextField(
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: Colors.blueAccent),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: Colors.lightBlue),
+          ),
         ),
       ),
-      body: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+    );
+  }
+
+  AppBar buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.blue,
+      title: Text(
+        'Create New User',
+      ),
+    );
+  }
+
+  Container buildAvatar() {
+    return Container(
+      margin: EdgeInsets.only(top: 30, bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(icon: Icon(Icons.add_a_photo), onPressed: null),
           Container(
