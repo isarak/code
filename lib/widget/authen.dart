@@ -1,4 +1,8 @@
+import 'package:aumpwa/utility/normal_dialog.dart';
+import 'package:aumpwa/widget/my_service.dart';
 import 'package:aumpwa/widget/register.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,6 +14,15 @@ class Authen extends StatefulWidget {
 
 class _AuthenState extends State<Authen> {
   bool statusRedEye = true;
+  String user = '', password = '';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    checkStatus();
+  }
 
   //create state
   @override
@@ -65,7 +78,20 @@ class _AuthenState extends State<Authen> {
       margin: EdgeInsets.only(top: 16),
       child: RaisedButton(
         color: Colors.lightBlue[700],
-        onPressed: () {},
+        onPressed: () async {
+          await FirebaseAuth.instance
+              .signInWithEmailAndPassword(email: user, password: password)
+              .then((value) => Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyService(),
+                  ),
+                  (route) => false))
+              .catchError((value) {
+            String error = value.message;
+            normalDailog(context, error, 6);
+          });
+        },
         child: Text(
           'Login',
           style: TextStyle(
@@ -84,6 +110,8 @@ class _AuthenState extends State<Authen> {
       width: 250,
       height: 40,
       child: TextField(
+        onChanged: (value) => user = value.trim(),
+        keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
           labelText: 'User :',
           border: OutlineInputBorder(),
@@ -98,6 +126,7 @@ class _AuthenState extends State<Authen> {
       width: 250,
       height: 40,
       child: TextField(
+        onChanged: (value) => password = value.trim(),
         obscureText: statusRedEye,
         decoration: InputDecoration(
           labelText: 'Password :',
@@ -128,5 +157,24 @@ class _AuthenState extends State<Authen> {
       width: 250,
       child: Image.asset('images/travel.png'),
     );
+  }
+
+  Future<Null> checkStatus() async {
+    await Firebase.initializeApp().then((value) async {
+      try {
+        await FirebaseAuth.instance.authStateChanges().listen((event) {
+          if (event != null) {
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyService(),
+                ),
+                (route) => false);
+          }
+        });
+      } catch (e) {
+        normalDailog(context, 'Network error', 6);
+      }
+    });
   }
 }

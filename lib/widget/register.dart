@@ -1,7 +1,11 @@
 import 'dart:io';
 
+import 'package:aumpwa/models/user_model.dart';
 import 'package:aumpwa/utility/normal_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,7 +27,7 @@ class _RegisterState extends State<Register> {
     'Officer',
   ];
 
-  String choosePositon, name, user, password; //defualt is null
+  String choosePositon, name, user, password, uid, urlPath; //defualt is null
   double lat, long; //defualt is null
   File file; // select import dart.io
 
@@ -196,6 +200,7 @@ class _RegisterState extends State<Register> {
       height: 40,
       margin: EdgeInsets.only(top: 15),
       child: TextField(
+        keyboardType: TextInputType.emailAddress, //mask on keyboard
         onChanged: (value) => user = value.trim(),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(),
@@ -250,7 +255,7 @@ class _RegisterState extends State<Register> {
         IconButton(
           color: Colors.white,
           icon: Icon(Icons.cloud_upload),
-          onPressed: () => uploadImage(),
+          onPressed: () => checkValidate(),
         ),
       ],
       backgroundColor: Colors.blue,
@@ -298,7 +303,7 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Future<Null> uploadImage() async {
+  Future<Null> checkValidate() async {
     print('name = $name, user = $user, password = $password');
     if (file == null) {
       normalDailog(context, 'Please Choose Avatar.', 1);
@@ -309,16 +314,56 @@ class _RegisterState extends State<Register> {
     } else if (user == null || user.isEmpty) {
       normalDailog(context, 'Please your username.', 4);
     } else if (password == null || password.isEmpty) {
-      normalDailog(context, 'Please your password.', 5);   
-    } else { 
-      normalDailog(context, 'Confirm', 4);
-      uploadThread();
+      normalDailog(context, 'Please your password.', 5);
+    } else {
+      //normalDailog(context, 'Confirm', 4);
+      createAccount();
     }
   }
 
-  Future<Null> uploadThread() async{
-    await Firebase.initializeApp().then((value) {
+  Future<Null> createAccount() async {
+    await Firebase.initializeApp().then((value) async {
       print('Success Connected.');
+      await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+        email: user,
+        password: password,
+      )
+          .then((success) {
+        uid = success.user.uid;
+        uploadImageThread();
+      }).catchError((error) {
+        String str = error.message;
+        normalDailog(context, str, 0);
+      });
     });
+  }
+
+  Future<Null> uploadImageThread() async {
+    String nameImage = '$uid.jpg';
+    StorageReference reference =
+        FirebaseStorage.instance.ref().child('Avatar/$nameImage');
+    StorageUploadTask task = reference.putFile(file);
+    urlPath = await (await task.onComplete).ref.getDownloadURL();
+
+    insertDataToFirebase();
+  }
+
+  Future<Null> insertDataToFirebase() async {
+    UserModel model = UserModel(
+      name: name,
+      path: urlPath,
+      position: choosePositon,
+      lat: lat.toString(),
+      long: long.toString(),
+    );
+
+    Map<String, dynamic> jsondata = model.toJson();
+
+    await FirebaseFirestore.instance
+        .collection('UserAum')
+        .doc(uid)
+        .set(jsondata)
+        .then((value) => Navigator.pop(context));
   }
 }
