@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:aumpwa/utility/normal_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,7 +22,7 @@ class _RegisterState extends State<Register> {
     'Officer',
   ];
 
-  String choosePositon; //defualt is null
+  String choosePositon, name, user, password; //defualt is null
   double lat, long; //defualt is null
   File file; // select import dart.io
 
@@ -112,17 +113,32 @@ class _RegisterState extends State<Register> {
   Container buildPosition() => Container(
         margin: EdgeInsets.only(top: 10, bottom: 10),
         width: 250,
-        child: DropdownButton<String>(
+        height: 60,
+        child: DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: Colors.blueAccent),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: Colors.lightBlue),
+            ),
+            prefixIcon: Icon(
+              Icons.assignment_ind,
+              color: Color(0xFF53B1F9),
+            ),
+          ),
           items: positions
               .map(
                 //map like JSON syntag
                 (e) => DropdownMenuItem(
                   child: Row(
                     children: [
-                      Icon(
+                      /*Icon(
                         Icons.assignment_ind,
                         color: Colors.lightBlue,
-                      ),
+                      ),*/
                       Text(e),
                     ],
                   ),
@@ -148,7 +164,8 @@ class _RegisterState extends State<Register> {
       width: 250,
       height: 40,
       child: Center(
-        child: TextField(
+        child: TextField( 
+          onChanged: (value)=> name = value.trim(),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.only(),
             hintText: 'Display Name',
@@ -176,6 +193,7 @@ class _RegisterState extends State<Register> {
       height: 40,
       margin: EdgeInsets.only(top: 15),
       child: TextField(
+        onChanged: (value)=> user = value.trim(),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(),
           hintText: 'Display User',
@@ -202,6 +220,7 @@ class _RegisterState extends State<Register> {
       height: 40,
       margin: EdgeInsets.only(top: 10),
       child: TextField(
+        onChanged: (value)=> password = value.trim(),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(),
           hintText: 'Display Password',
@@ -224,6 +243,13 @@ class _RegisterState extends State<Register> {
 
   AppBar buildAppBar() {
     return AppBar(
+      actions: [
+        IconButton(
+          color: Colors.white,
+          icon: Icon(Icons.cloud_upload),
+          onPressed: () => uploadImage(),
+        ),
+      ],
       backgroundColor: Colors.blue,
       title: Text(
         'Create New User',
@@ -267,5 +293,22 @@ class _RegisterState extends State<Register> {
         ],
       ),
     );
+  }
+
+  Future<Null> uploadImage() async{
+    print('name = $name, user = $user, password = $password');
+    if (file == null) {
+      normalDailog(context, 'Please Choose Avatar.',1);
+    }else if (name == null || name.isEmpty) {
+      normalDailog(context, 'Please your name.',2);
+    } else if(user == null || user.isEmpty) {
+      normalDailog(context, 'Please your username.',3);
+    }else if(password == null || password.isEmpty){
+      normalDailog(context, 'Please your password.',4);
+    }else if(choosePositon == null){
+      normalDailog(context, 'Please Choose your position.',5);
+    }else{
+      normalDailog(context, 'Confirm',4);
+    }
   }
 }
