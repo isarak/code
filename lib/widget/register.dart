@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:aumpwa/utility/normal_dialog.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -115,6 +116,8 @@ class _RegisterState extends State<Register> {
         width: 250,
         height: 60,
         child: DropdownButtonFormField<String>(
+          validator: (value) =>
+              value == null ? 'Please fill in your position' : null,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
@@ -122,7 +125,7 @@ class _RegisterState extends State<Register> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(color: Colors.lightBlue),
+              borderSide: BorderSide(color: Colors.lightGreen),
             ),
             prefixIcon: Icon(
               Icons.assignment_ind,
@@ -164,8 +167,8 @@ class _RegisterState extends State<Register> {
       width: 250,
       height: 40,
       child: Center(
-        child: TextField( 
-          onChanged: (value)=> name = value.trim(),
+        child: TextField(
+          onChanged: (value) => name = value.trim(),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.only(),
             hintText: 'Display Name',
@@ -179,7 +182,7 @@ class _RegisterState extends State<Register> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.lightBlue),
+              borderSide: BorderSide(color: Colors.lightGreen),
             ),
           ),
         ),
@@ -193,7 +196,7 @@ class _RegisterState extends State<Register> {
       height: 40,
       margin: EdgeInsets.only(top: 15),
       child: TextField(
-        onChanged: (value)=> user = value.trim(),
+        onChanged: (value) => user = value.trim(),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(),
           hintText: 'Display User',
@@ -207,7 +210,7 @@ class _RegisterState extends State<Register> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(color: Colors.lightBlue),
+            borderSide: BorderSide(color: Colors.lightGreen),
           ),
         ),
       ),
@@ -220,7 +223,7 @@ class _RegisterState extends State<Register> {
       height: 40,
       margin: EdgeInsets.only(top: 10),
       child: TextField(
-        onChanged: (value)=> password = value.trim(),
+        onChanged: (value) => password = value.trim(),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(),
           hintText: 'Display Password',
@@ -234,7 +237,7 @@ class _RegisterState extends State<Register> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(color: Colors.lightBlue),
+            borderSide: BorderSide(color: Colors.lightGreen),
           ),
         ),
       ),
@@ -295,20 +298,27 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Future<Null> uploadImage() async{
+  Future<Null> uploadImage() async {
     print('name = $name, user = $user, password = $password');
     if (file == null) {
-      normalDailog(context, 'Please Choose Avatar.',1);
-    }else if (name == null || name.isEmpty) {
-      normalDailog(context, 'Please your name.',2);
-    } else if(user == null || user.isEmpty) {
-      normalDailog(context, 'Please your username.',3);
-    }else if(password == null || password.isEmpty){
-      normalDailog(context, 'Please your password.',4);
-    }else if(choosePositon == null){
-      normalDailog(context, 'Please Choose your position.',5);
-    }else{
-      normalDailog(context, 'Confirm',4);
+      normalDailog(context, 'Please Choose Avatar.', 1);
+    } else if (choosePositon == null) {
+      normalDailog(context, 'Please Choose your position.', 2);
+    } else if (name == null || name.isEmpty) {
+      normalDailog(context, 'Please your name.', 3);
+    } else if (user == null || user.isEmpty) {
+      normalDailog(context, 'Please your username.', 4);
+    } else if (password == null || password.isEmpty) {
+      normalDailog(context, 'Please your password.', 5);   
+    } else { 
+      normalDailog(context, 'Confirm', 4);
+      uploadThread();
     }
+  }
+
+  Future<Null> uploadThread() async{
+    await Firebase.initializeApp().then((value) {
+      print('Success Connected.');
+    });
   }
 }
