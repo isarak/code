@@ -32,8 +32,8 @@ class _AuthenState extends State<Authen> {
         decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment(0, -0.4),
-            radius: 3,
-            colors: [Colors.white, Colors.blue],
+            radius: 5,
+            colors: [Colors.white, Colors.lightBlue],
           ),
         ),
         child: Center(

@@ -12,41 +12,62 @@ class _MyServiceState extends State<MyService> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      drawer: Drawer(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              decoration: BoxDecoration(color: Colors.redAccent),
-              child: ListTile(
-                onTap: () async {
-                  await FirebaseAuth.instance
-                      .signOut()
-                      .then((value) => Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Authen(),
-                          ),
-                          (route) => false));
-                },
-                leading: Icon(
-                  Icons.exit_to_app,
-                  size: 36,
-                  color: Colors.white,
-                ),
-                title: Text(
-                  'Sign out',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      drawer: buildDrawer(),
+    );
+  }
+
+  Drawer buildDrawer() {
+    return Drawer(
+      child: Stack(
+        children: [
+          UserAccountsDrawerHeader(
+            arrowColor: Colors.white,
+            accountName: Text('Name :'),
+            accountEmail: Text('Email :'),
+          ),
+          buildSignOut(),
+        ],
       ),
     );
+  }
+
+  Column buildSignOut() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          decoration: BoxDecoration(color: Colors.redAccent),
+          child: ListTile(
+            onTap: () {
+              processSignOut();
+            },
+            leading: Icon(
+              Icons.exit_to_app,
+              size: 36,
+              color: Colors.white,
+            ),
+            title: Text(
+              'Sign out',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<Null> processSignOut() async {
+    await FirebaseAuth.instance
+        .signOut()
+        .then((value) => Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Authen(),
+            ),
+            (route) => false));
   }
 }
